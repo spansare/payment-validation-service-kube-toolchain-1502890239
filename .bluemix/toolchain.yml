@@ -1,0 +1,59 @@
+version: '2'
+messages:
+  $i18n: locales.yml
+template:
+  name:
+    $ref: "#/messages/template.name"
+  description:
+    $ref: "#/messages/template.description"
+  header: '![](toolchain.svg?localize)'
+  icon: secure-lock-kubernetes.svg
+  required:
+    - hello-world-build
+    - hello-world-repo
+  info:
+    git url: >-
+      [https://github.com/open-toolchain/secure-kube-toolchain](https://github.com/open-toolchain/secure-kube-toolchain)
+    git branch: >-
+      [master](https://github.com/open-toolchain/secure-kube-toolchain/tree/master)
+toolchain:
+  name: payment-validation-service-1502890239
+  template:
+    getting_started:
+      $ref: "#/messages/template.gettingStarted"
+services:
+  hello-world-repo:
+    service_id: hostedgit
+    parameters:
+      repo_name: 'payment-validation-service-1502890239'
+      repo_url: 'https://github.com/spansare/PaymentValidationService'
+      type: clone
+      has_issues: true
+      enable_traceability: true
+  hello-world-build:
+    service_id: pipeline
+    parameters:
+      services:
+        - hello-world-repo
+      name: payment-validation-service-1502890239-pipeline
+      ui-pipeline: true
+      configuration:
+        content:
+          $text: pipeline.yml
+        env:
+          GIT_REPO: hello-world-repo
+          CF_APP_NAME: '{{form.pipeline.parameters.app-name}}'
+          PROD_SPACE_NAME: '{{space}}'
+          PROD_ORG_NAME: '{{organization}}'
+          PROD_REGION_ID: '{{region}}'
+          PROD_CLUSTER_NAME: mycluster
+          API_KEY: GiZ-VvJ9ycZHevfCvPSLwH77c25zfeOUrD_mzMMocEmv
+        execute: true
+  webide:
+    service_id: orion
+form:
+  pipeline:
+    parameters:
+      app-name: '{{services.hello-world-repo.parameters.repo_name}}'
+    schema:
+      $ref: deploy.json
